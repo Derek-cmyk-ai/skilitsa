@@ -1,0 +1,378 @@
+.skilitsa-dogmatcher {
+  max-width: 860px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  border: 1px solid #e3e3e3;
+  border-radius: 12px;
+  background: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.skilitsa-dogmatcher img {
+  border-radius: 30px;
+}
+
+.skilitsa-dogmatcher__quiz {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.skilitsa-dogmatcher__header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.skilitsa-dogmatcher__section-title {
+  font-size: 1.3rem;
+  margin: 0;
+}
+
+.skilitsa-dogmatcher__progress {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.skilitsa-dogmatcher__progress-bar {
+  flex: 1;
+  height: 10px;
+  border-radius: 999px;
+  background: #e5e7eb;
+  overflow: hidden;
+}
+
+.skilitsa-dogmatcher__progress-fill {
+  height: 100%;
+  background: #1d4ed8;
+  width: 0;
+  transition: width 0.3s ease;
+}
+
+.skilitsa-dogmatcher__progress-text {
+  font-size: 0.85rem;
+  color: #4b5563;
+}
+
+.skilitsa-dogmatcher__question-title {
+  margin-bottom: 0.5rem;
+  font-size: 1.15rem;
+}
+
+.skilitsa-dogmatcher__helper-text {
+  margin: 0 0 1rem;
+  color: #4b5563;
+}
+
+.skilitsa-dogmatcher__image-single {
+  max-width: 640px;
+  margin: 0 auto 1.5rem;
+}
+
+.skilitsa-dogmatcher__image-single-item {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  display: block;
+}
+
+.skilitsa-dogmatcher__image-slider {
+  position: relative;
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto 1.5rem;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+}
+
+.skilitsa-dogmatcher__image-slider-base,
+.skilitsa-dogmatcher__image-slider-overlay-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.skilitsa-dogmatcher__image-slider-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 50%;
+  overflow: hidden;
+}
+
+.skilitsa-dogmatcher__image-slider-handle {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 2px;
+  background: #ffffff;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2);
+  transform: translateX(-1px);
+  pointer-events: none;
+}
+
+.skilitsa-dogmatcher__image-slider-handle::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: #1d4ed8;
+  border: 2px solid #fff;
+}
+
+.skilitsa-dogmatcher__image-slider-range {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: ew-resize;
+}
+
+.skilitsa-dogmatcher__image-fallback {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  margin-bottom: 1.5rem;
+}
+
+.skilitsa-dogmatcher__image-fallback-item {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  display: block;
+}
+
+.skilitsa-dogmatcher__image-pulse {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  margin-bottom: 1.5rem;
+}
+
+.skilitsa-dogmatcher__image-pulse-item {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  display: block;
+  animation: dogmatcherPulse 3s ease-in-out infinite;
+}
+
+@keyframes dogmatcherPulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.03);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+}
+
+.skilitsa-dogmatcher__scale {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.skilitsa-dogmatcher__scale-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid #d8d8d8;
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.skilitsa-dogmatcher__scale-option input {
+  margin: 0;
+}
+
+.skilitsa-dogmatcher__toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.skilitsa-dogmatcher__toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.skilitsa-dogmatcher__controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.skilitsa-dogmatcher__button {
+  background: #1d4ed8;
+  color: #fff;
+  border: none;
+  padding: 0.65rem 1.25rem;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.skilitsa-dogmatcher__button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.skilitsa-dogmatcher__button.is-secondary {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.skilitsa-dogmatcher__link {
+  background: none;
+  border: none;
+  color: #1d4ed8;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+}
+
+.skilitsa-dogmatcher__results {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  border-radius: 12px;
+  background: #f8fafc;
+  display: none;
+}
+
+.skilitsa-dogmatcher__results.is-visible {
+  display: block;
+}
+
+.skilitsa-dogmatcher__results-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.skilitsa-dogmatcher__result-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  text-decoration: none;
+  color: inherit;
+  position: relative;
+}
+
+.skilitsa-dogmatcher__result-card img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+.skilitsa-dogmatcher__result-badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: #1d4ed8;
+  color: #fff;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.skilitsa-dogmatcher__result-badge.is-small {
+  position: static;
+  font-size: 0.8rem;
+}
+
+.skilitsa-dogmatcher__results-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.skilitsa-dogmatcher__result-row {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+}
+
+.skilitsa-dogmatcher__result-row-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.skilitsa-dogmatcher__result-row-header a {
+  text-decoration: none;
+  color: #111827;
+  font-weight: 600;
+}
+
+.skilitsa-dogmatcher__result-details {
+  margin: 0;
+  padding-left: 1rem;
+  color: #4b5563;
+}
+
+.skilitsa-dogmatcher__results-more {
+  margin-top: 1rem;
+}
+
+.skilitsa-dogmatcher__results-actions {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.skilitsa-dogmatcher__disclaimer {
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+  color: #4b5563;
+}
+
+.skilitsa-dogmatcher__debug {
+  margin-top: 1rem;
+  background: #111827;
+  color: #f9fafb;
+  padding: 1rem;
+  border-radius: 12px;
+  overflow-x: auto;
+}
+
+@media (max-width: 640px) {
+  .skilitsa-dogmatcher__scale {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .skilitsa-dogmatcher__result-row-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
