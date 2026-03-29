@@ -17,6 +17,16 @@ define('SKILITSA_DOGMATCHER_PATH', plugin_dir_path(__FILE__));
 define('SKILITSA_DOGMATCHER_URL', plugin_dir_url(__FILE__));
 define('SKILITSA_DOGMATCHER_MASTER_SHEET_URL', 'https://docs.google.com/spreadsheets/d/1Du1Lod48C0naHt6NWUc1DP_5BAf9st90cKDDsUdwpY0/edit?usp=drive_link');
 
+function skilitsa_dogmatcher_load_textdomain(): void
+{
+    load_plugin_textdomain(
+        'skilitsa_dogmatcher',
+        false,
+        dirname(plugin_basename(__FILE__)) . '/languages'
+    );
+}
+add_action('init', 'skilitsa_dogmatcher_load_textdomain');
+
 $helpers_path = SKILITSA_DOGMATCHER_PATH . 'includes/helpers.php';
 if (file_exists($helpers_path)) {
     require_once $helpers_path;

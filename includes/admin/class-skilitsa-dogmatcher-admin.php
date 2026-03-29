@@ -6,7 +6,7 @@ if (!defined('ABSPATH')) {
 
 class Skilitsa_DogMatcher_Admin
 {
-    private const CACHE_TTL = 600;
+    private const CACHE_TTL = 604800; // 1 week
     private const REQUIRED_TABS = [
         'SETTINGS',
         'UI_TEXTS',
@@ -349,7 +349,7 @@ class Skilitsa_DogMatcher_Admin
             );
         }
 
-        if (str_starts_with($body, 'Λυπούμαστε') || mb_stripos($body, 'το αρχείο που ζητήσατε') !== false) {
+        if (strpos($body, 'Λυπούμαστε') === 0 || mb_stripos($body, 'το αρχείο που ζητήσατε') !== false) {
             return new WP_Error(
                 'skilitsa_dogmatcher_not_found',
                 'Google Sheets did not return CSV. Check share permissions or sheet name.'

@@ -11,6 +11,10 @@
     if (uiTexts && typeof uiTexts[key] !== 'undefined' && uiTexts[key] !== '') {
       return uiTexts[key];
     }
+    const { labels } = SkilitsaDogMatcherData;
+    if (labels && typeof labels[key] !== 'undefined' && labels[key] !== '') {
+      return labels[key];
+    }
     return fallback;
   };
 
