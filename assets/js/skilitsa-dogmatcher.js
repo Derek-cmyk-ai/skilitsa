@@ -13,6 +13,10 @@
     }
     const { labels } = SkilitsaDogMatcherData;
     if (labels && typeof labels[key] !== 'undefined' && labels[key] !== '') {
+      // For progress_label, we need to manually sprintf it in JS
+      if (key === 'progress_label' && fallback.includes(' of ')) {
+          return labels[key]; // The actual sprint logic happens later, return template
+      }
       return labels[key];
     }
     return fallback;
@@ -304,7 +308,11 @@
     const current = Math.min(state.currentIndex + 1, total);
     const percent = total > 0 ? Math.round((current / total) * 100) : 0;
     progressFill.style.width = `${percent}%`;
-    progressText.textContent = getUIText('progress_label', `Question ${current} of ${total}`);
+        let labelText = getUIText('progress_label', `Question ${current} of ${total}`);
+    if (labelText.includes('%1$s')) {
+      labelText = labelText.replace('%1$s', current).replace('%2$s', total);
+    }
+    progressText.textContent = labelText;
   };
 
   const getTraitLabels = () => {

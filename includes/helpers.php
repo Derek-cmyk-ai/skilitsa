@@ -12,7 +12,7 @@ if (!function_exists('skilitsa_dogmatcher_register_missing_file_notice')) {
                 return;
             }
             echo '<div class="notice notice-error"><p>' . esc_html(sprintf(
-                __('Skilitsa DogMatcher: plugin files are incomplete/mismatched. Please re-upload the full plugin folder (zip → extract). Missing file: %s', 'skilitsa_dogmatcher'),
+                'Skilitsa DogMatcher: plugin files are incomplete/mismatched. Please re-upload the full plugin folder (zip → extract). Missing file: %s',
                 $file_path
             )) . '</p></div>';
         });

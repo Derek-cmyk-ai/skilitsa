@@ -32,6 +32,23 @@ class Skilitsa_DogMatcher_Shortcode
 
     public function render_shortcode(): string
     {
+        $meta = get_option('skilitsa_dogmatcher_sync_meta', []);
+        $last_sync = isset($meta['last_sync']) ? (int) $meta['last_sync'] : 0;
+        // 7 days in seconds = 604800
+        if (time() - $last_sync > 604800 && class_exists('Skilitsa_DogMatcher_Admin')) {
+            $admin = new Skilitsa_DogMatcher_Admin();
+            // Call the sync logic via reflection or public method.
+            // In class-skilitsa-dogmatcher-admin.php, `sync_from_sheet` is private, but we can call a public helper
+            // Since it's meant to be triggered by admin, we will bypass full sync here or simply trigger a remote post.
+            // Let's create a background wp_remote_post to avoid blocking the user.
+            wp_remote_post(admin_url('admin-post.php'), [
+                'body' => [
+                    'action' => 'skilitsa_dogmatcher_refresh_background'
+                ],
+                'blocking' => false,
+            ]);
+        }
+
         $config = Skilitsa_DogMatcher::get_config();
         if (empty($config['questions']) || empty($config['breeds'])) {
             return '<div class="skilitsa-dogmatcher">' . esc_html__('DogMatcher is not configured yet. Please sync the Google Sheet in the settings page.', 'skilitsa_dogmatcher') . '</div>';

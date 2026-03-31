@@ -32,7 +32,7 @@ if (file_exists($helpers_path)) {
     require_once $helpers_path;
 } else {
     add_action('admin_notices', static function (): void {
-        echo '<div class="notice notice-error"><p>' . esc_html__('Skilitsa DogMatcher: Plugin files incomplete, please re-upload plugin folder.', 'skilitsa_dogmatcher') . '</p></div>';
+        echo '<div class="notice notice-error"><p>' . esc_html('Skilitsa DogMatcher: Plugin files incomplete, please re-upload plugin folder.') . '</p></div>';
     });
     return;
 }

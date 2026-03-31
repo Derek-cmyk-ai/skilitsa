@@ -34,13 +34,28 @@ class Skilitsa_DogMatcher_Admin
         add_action('admin_menu', [$this, 'register_menu']);
         add_action('admin_init', [$this, 'register_settings']);
         add_action('admin_post_skilitsa_dogmatcher_refresh', [$this, 'handle_refresh']);
+        add_action('admin_post_nopriv_skilitsa_dogmatcher_refresh_background', [$this, 'handle_refresh_background']);
+        add_action('admin_post_skilitsa_dogmatcher_refresh_background', [$this, 'handle_refresh_background']);
+    }
+
+    public function handle_refresh_background(): void
+    {
+        $settings = $this->get_settings();
+        $sheet_url = $settings['sheet_url'] ?? '';
+        $result = $this->sync_from_sheet($sheet_url, true);
+        $meta = $result['meta'];
+        update_option('skilitsa_dogmatcher_sync_meta', $meta);
+        if (!empty($result['config'])) {
+            update_option('skilitsa_dogmatcher_config', $result['config']);
+        }
+        wp_die();
     }
 
     public function register_menu(): void
     {
         add_options_page(
-            __('Skilitsa DogMatcher', 'skilitsa_dogmatcher'),
-            __('Skilitsa DogMatcher', 'skilitsa_dogmatcher'),
+            'Skilitsa DogMatcher',
+            'Skilitsa DogMatcher',
             'manage_options',
             'skilitsa-dogmatcher',
             [$this, 'render_settings_page']
@@ -57,14 +72,14 @@ class Skilitsa_DogMatcher_Admin
 
         add_settings_section(
             'skilitsa_dogmatcher_main',
-            __('Google Sheet Configuration', 'skilitsa_dogmatcher'),
+            'Google Sheet Configuration',
             [$this, 'render_section_intro'],
             'skilitsa-dogmatcher'
         );
 
         add_settings_field(
             'sheet_url',
-            __('Google Sheet URL', 'skilitsa_dogmatcher'),
+            'Google Sheet URL <span title="Paste the link to your Google Sheet here. It must be shared as \'Anyone with the link can view\'. Leave empty to use the default Skilitsa master sheet." style="cursor:help; border-bottom: 1px dotted #888; color: #0073aa; font-weight: normal; font-size: 12px; margin-left: 4px;">(i)</span>',
             [$this, 'render_sheet_url_field'],
             'skilitsa-dogmatcher',
             'skilitsa_dogmatcher_main'
@@ -73,7 +88,7 @@ class Skilitsa_DogMatcher_Admin
 
     public function render_section_intro(): void
     {
-        echo '<p>' . esc_html__('Provide a Google Sheet share link or direct link. Leave blank to use the default master sheet.', 'skilitsa_dogmatcher') . '</p>';
+        echo '<p>' . esc_html('Provide a Google Sheet share link or direct link. Leave blank to use the default master sheet.') . '</p>';
     }
 
     public function render_sheet_url_field(): void
@@ -87,7 +102,7 @@ class Skilitsa_DogMatcher_Admin
     {
         $meta = $this->get_sync_meta();
         $last_sync = isset($meta['last_sync']) ? (int) $meta['last_sync'] : 0;
-        $last_sync_display = $last_sync ? date_i18n(get_option('date_format') . ' ' . get_option('time_format'), $last_sync) : __('Never', 'skilitsa_dogmatcher');
+        $last_sync_display = $last_sync ? date_i18n(get_option('date_format') . ' ' . get_option('time_format'), $last_sync) : 'Never';
         $counts = isset($meta['counts']) && is_array($meta['counts']) ? $meta['counts'] : [];
         $errors = isset($meta['errors']) && is_array($meta['errors']) ? $meta['errors'] : [];
         $warnings = isset($meta['warnings']) && is_array($meta['warnings']) ? $meta['warnings'] : [];
@@ -113,29 +128,32 @@ class Skilitsa_DogMatcher_Admin
         }
         ?>
         <div class="wrap">
-            <h1><?php echo esc_html__('Skilitsa DogMatcher', 'skilitsa_dogmatcher'); ?></h1>
+            <h1><?php echo esc_html('Skilitsa DogMatcher'); ?> <span style="font-size:14px; color:#555; vertical-align:middle; margin-left:10px;">by <a href="https://skilitsa.com" target="_blank" rel="noopener">Skilitsa.com</a></span></h1>
             <?php if (!$has_sheet_url && !$has_master_url) : ?>
                 <div class="notice notice-error">
-                    <p><?php echo esc_html__('Google Sheet URL is missing and no master sheet URL is configured. Please add a sheet URL.', 'skilitsa_dogmatcher'); ?></p>
+                    <p><?php echo esc_html('Google Sheet URL is missing and no master sheet URL is configured. Please add a sheet URL.'); ?></p>
                 </div>
             <?php endif; ?>
             <form method="post" action="options.php">
                 <?php settings_fields('skilitsa_dogmatcher'); ?>
                 <?php do_settings_sections('skilitsa-dogmatcher'); ?>
-                <?php submit_button(__('Save Settings', 'skilitsa_dogmatcher')); ?>
+                <?php submit_button('Save Settings'); ?>
             </form>
             <hr />
-            <h2><?php echo esc_html__('Sync from Google Sheet', 'skilitsa_dogmatcher'); ?></h2>
-            <p><?php echo esc_html__('Last sync:', 'skilitsa_dogmatcher'); ?> <strong><?php echo esc_html($last_sync_display); ?></strong></p>
+            <h2>
+                <?php echo esc_html('Sync from Google Sheet'); ?>
+                <span title="Data is automatically refreshed once per week (every 7 days). Click the Refresh button below to force an immediate update from your Google Sheet." style="cursor:help; border-bottom: 1px dotted #888; color: #0073aa; font-weight: normal; font-size: 14px; margin-left: 6px;">(i)</span>
+            </h2>
+            <p><?php echo esc_html('Last sync:'); ?> <strong><?php echo esc_html($last_sync_display); ?></strong></p>
             <ul>
-                <li><?php echo esc_html__('Breeds:', 'skilitsa_dogmatcher'); ?> <?php echo esc_html((string) ($counts['breeds'] ?? 0)); ?></li>
-                <li><?php echo esc_html__('Questions:', 'skilitsa_dogmatcher'); ?> <?php echo esc_html((string) ($counts['questions'] ?? 0)); ?></li>
-                <li><?php echo esc_html__('Traits:', 'skilitsa_dogmatcher'); ?> <?php echo esc_html((string) ($counts['traits'] ?? 0)); ?></li>
-                <li><?php echo esc_html__('Templates:', 'skilitsa_dogmatcher'); ?> <?php echo esc_html((string) ($counts['templates'] ?? 0)); ?></li>
+                <li><?php echo esc_html('Breeds:'); ?> <?php echo esc_html((string) ($counts['breeds'] ?? 0)); ?></li>
+                <li><?php echo esc_html('Questions:'); ?> <?php echo esc_html((string) ($counts['questions'] ?? 0)); ?></li>
+                <li><?php echo esc_html('Traits:'); ?> <?php echo esc_html((string) ($counts['traits'] ?? 0)); ?></li>
+                <li><?php echo esc_html('Templates:'); ?> <?php echo esc_html((string) ($counts['templates'] ?? 0)); ?></li>
             </ul>
             <?php if (!empty($errors)) : ?>
                 <div class="notice notice-error">
-                    <p><strong><?php echo esc_html__('Errors', 'skilitsa_dogmatcher'); ?></strong></p>
+                    <p><strong><?php echo esc_html('Errors'); ?></strong></p>
                     <ul>
                         <?php foreach ($errors as $error) : ?>
                             <li><?php echo esc_html($error); ?></li>
@@ -143,17 +161,17 @@ class Skilitsa_DogMatcher_Admin
                     </ul>
                 </div>
                 <div class="notice notice-info">
-                    <p><strong><?php echo esc_html__('How to fix CSV errors', 'skilitsa_dogmatcher'); ?></strong></p>
+                    <p><strong><?php echo esc_html('How to fix CSV errors'); ?></strong></p>
                     <ul>
-                        <li><?php echo esc_html__('Confirm the sheet is shared as “Anyone with the link: Viewer”.', 'skilitsa_dogmatcher'); ?></li>
-                        <li><?php echo esc_html__('Confirm the tab name matches exactly (SETTINGS, UI_TEXTS, SECTIONS, TRAITS, QUESTIONS, MAPPING, RESULT_TEMPLATES, BREEDS).', 'skilitsa_dogmatcher'); ?></li>
-                        <li><?php echo esc_html__('Open the CSV URL in a browser to verify it downloads a CSV file.', 'skilitsa_dogmatcher'); ?></li>
+                        <li><?php echo esc_html('Confirm the sheet is shared as “Anyone with the link: Viewer”.'); ?></li>
+                        <li><?php echo esc_html('Confirm the tab name matches exactly (SETTINGS, UI_TEXTS, SECTIONS, TRAITS, QUESTIONS, MAPPING, RESULT_TEMPLATES, BREEDS).'); ?></li>
+                        <li><?php echo esc_html('Open the CSV URL in a browser to verify it downloads a CSV file.'); ?></li>
                     </ul>
                 </div>
             <?php endif; ?>
             <?php if (!empty($warnings)) : ?>
                 <div class="notice notice-warning">
-                    <p><strong><?php echo esc_html__('Warnings', 'skilitsa_dogmatcher'); ?></strong></p>
+                    <p><strong><?php echo esc_html('Warnings'); ?></strong></p>
                     <ul>
                         <?php foreach ($warnings as $warning) : ?>
                             <li><?php echo esc_html($warning); ?></li>
@@ -164,20 +182,20 @@ class Skilitsa_DogMatcher_Admin
             <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
                 <?php wp_nonce_field('skilitsa_dogmatcher_refresh', 'skilitsa_dogmatcher_refresh_nonce'); ?>
                 <input type="hidden" name="action" value="skilitsa_dogmatcher_refresh" />
-                <?php submit_button(__('Refresh from Google Sheet', 'skilitsa_dogmatcher'), 'secondary'); ?>
+                <?php submit_button('Refresh from Google Sheet', 'secondary'); ?>
             </form>
             <?php if ($sheet_id) : ?>
-                <h3><?php echo esc_html__('Test CSV links', 'skilitsa_dogmatcher'); ?></h3>
+                <h3><?php echo esc_html('Test CSV links'); ?></h3>
                 <ul>
-                    <li><a href="<?php echo esc_url($this->build_csv_link($sheet_id, 'SETTINGS')); ?>" target="_blank" rel="noopener"><?php echo esc_html__('SETTINGS CSV', 'skilitsa_dogmatcher'); ?></a></li>
-                    <li><a href="<?php echo esc_url($this->build_csv_link($sheet_id, 'QUESTIONS')); ?>" target="_blank" rel="noopener"><?php echo esc_html__('QUESTIONS CSV', 'skilitsa_dogmatcher'); ?></a></li>
-                    <li><a href="<?php echo esc_url($this->build_csv_link($sheet_id, 'BREEDS')); ?>" target="_blank" rel="noopener"><?php echo esc_html__('BREEDS CSV', 'skilitsa_dogmatcher'); ?></a></li>
+                    <li><a href="<?php echo esc_url($this->build_csv_link($sheet_id, 'SETTINGS')); ?>" target="_blank" rel="noopener"><?php echo esc_html('SETTINGS CSV'); ?></a></li>
+                    <li><a href="<?php echo esc_url($this->build_csv_link($sheet_id, 'QUESTIONS')); ?>" target="_blank" rel="noopener"><?php echo esc_html('QUESTIONS CSV'); ?></a></li>
+                    <li><a href="<?php echo esc_url($this->build_csv_link($sheet_id, 'BREEDS')); ?>" target="_blank" rel="noopener"><?php echo esc_html('BREEDS CSV'); ?></a></li>
                 </ul>
             <?php endif; ?>
             <hr />
-            <h2><?php echo esc_html__('Debug', 'skilitsa_dogmatcher'); ?></h2>
-            <p><?php echo esc_html__('First breed external URL:', 'skilitsa_dogmatcher'); ?> <code><?php echo esc_html($first_breed_url ?: __('(empty)', 'skilitsa_dogmatcher')); ?></code></p>
-            <p><?php echo esc_html__('First question image URLs:', 'skilitsa_dogmatcher'); ?></p>
+            <h2><?php echo esc_html('Debug'); ?></h2>
+            <p><?php echo esc_html('First breed external URL:'); ?> <code><?php echo esc_html($first_breed_url ?: '(empty)'); ?></code></p>
+            <p><?php echo esc_html('First question image URLs:'); ?></p>
             <?php if (!empty($first_question_images)) : ?>
                 <ul>
                     <?php foreach ($first_question_images as $image_url) : ?>
@@ -185,21 +203,55 @@ class Skilitsa_DogMatcher_Admin
                     <?php endforeach; ?>
                 </ul>
             <?php else : ?>
-                <p><code><?php echo esc_html__('(none)', 'skilitsa_dogmatcher'); ?></code></p>
+                <p><code><?php echo esc_html('(none)'); ?></code></p>
             <?php endif; ?>
-            <details class="skilitsa-dogmatcher__troubleshooting">
-                <summary><?php echo esc_html__('Troubleshooting (quick fixes)', 'skilitsa_dogmatcher'); ?></summary>
+            <details class="skilitsa-dogmatcher__troubleshooting" style="margin-bottom: 30px;">
+                <summary><?php echo esc_html('Troubleshooting (quick fixes)'); ?></summary>
                 <ul>
-                    <li><?php echo esc_html__('Permissions: share the Google Sheet as “Anyone with the link: Viewer”.', 'skilitsa_dogmatcher'); ?></li>
-                    <li><?php echo esc_html__('Exact tab names: SETTINGS, UI_TEXTS, SECTIONS, TRAITS, QUESTIONS, MAPPING, RESULT_TEMPLATES, BREEDS.', 'skilitsa_dogmatcher'); ?></li>
-                    <li><?php echo esc_html__('CSV format: https://docs.google.com/spreadsheets/d/<ID>/gviz/tq?tqx=out:csv&sheet=<TAB>', 'skilitsa_dogmatcher'); ?></li>
-                    <li><?php echo esc_html__('Refresh pulls fresh CSV data and updates stored config + counts.', 'skilitsa_dogmatcher'); ?></li>
-                    <li><?php echo esc_html__('Warnings mean the MVP can still work; fix data when ready.', 'skilitsa_dogmatcher'); ?></li>
-                    <li><?php echo esc_html__('Plugin updates: upload the full plugin folder (zip → extract).', 'skilitsa_dogmatcher'); ?></li>
+                    <li><?php echo esc_html('Permissions: share the Google Sheet as “Anyone with the link: Viewer”.'); ?></li>
+                    <li><?php echo esc_html('Exact tab names: SETTINGS, UI_TEXTS, SECTIONS, TRAITS, QUESTIONS, MAPPING, RESULT_TEMPLATES, BREEDS.'); ?></li>
+                    <li><?php echo esc_html('CSV format: https://docs.google.com/spreadsheets/d/<ID>/gviz/tq?tqx=out:csv&sheet=<TAB>'); ?></li>
+                    <li><?php echo esc_html('Refresh pulls fresh CSV data and updates stored config + counts.'); ?></li>
+                    <li><?php echo esc_html('Warnings mean the MVP can still work; fix data when ready.'); ?></li>
+                    <li><?php echo esc_html('Plugin updates: upload the full plugin folder (zip → extract).'); ?></li>
                 </ul>
             </details>
+
+            <hr />
+            <h2>
+                <?php echo esc_html('Documentation (README)'); ?>
+                <span title="Here you can read all instructions on how the Skilitsa DogMatcher works." style="cursor:help; border-bottom: 1px dotted #888; color: #0073aa; font-weight: normal; font-size: 14px; margin-left: 6px;">(i)</span>
+            </h2>
+            <div class="skilitsa-dogmatcher__readme-container" style="background:#fff; border:1px solid #ccd0d4; padding:20px 30px; margin-top:20px; max-width:800px; border-radius:4px;">
+                <?php echo file_exists(SKILITSA_DOGMATCHER_PATH . 'README.md') ? wp_kses_post($this->parse_basic_markdown(file_get_contents(SKILITSA_DOGMATCHER_PATH . 'README.md'))) : esc_html__('README.md not found.', 'skilitsa_dogmatcher'); ?>
+            </div>
         </div>
         <?php
+    }
+
+    private function parse_basic_markdown(string $md): string
+    {
+        $md = preg_replace('/^### (.*?)$/m', '<h3>$1</h3>', $md);
+        $md = preg_replace('/^## (.*?)$/m', '<h2>$1</h2>', $md);
+        $md = preg_replace('/^# (.*?)$/m', '<h1>$1</h1>', $md);
+        $md = preg_replace('/\*\*(.*?)\*\*/', '<strong>$1</strong>', $md);
+        $md = preg_replace('/```(.*?)```/s', '<pre style="background:#f0f0f1; padding:10px; border-radius:4px;"><code>$1</code></pre>', $md);
+        $md = preg_replace('/`(.*?)`/', '<code style="background:#f0f0f1; padding:2px 4px; border-radius:4px;">$1</code>', $md);
+        $md = preg_replace('/^- (.*?)$/m', '<li>$1</li>', $md);
+        $paragraphs = explode("\n\n", $md);
+        foreach ($paragraphs as &$p) {
+            $p = trim($p);
+            if ($p === '') {
+                continue;
+            }
+            if (!preg_match('/^<([h|ul|li|pre|hr])/', $p)) {
+                $p = '<p>' . nl2br($p) . '</p>';
+            }
+        }
+        $md = implode("\n", $paragraphs);
+        $md = preg_replace('/((?:<li>.*?<\/li>\s*)+)/s', '<ul style="list-style-type:disc; padding-left:20px; margin-bottom:15px;">$1</ul>', $md);
+
+        return $md;
     }
 
     public function sanitize_settings(array $input): array
@@ -210,7 +262,7 @@ class Skilitsa_DogMatcher_Admin
         if ($sheet_url !== '') {
             $sheet_id = $this->extract_sheet_id($sheet_url);
             if (!$sheet_id) {
-                add_settings_error('skilitsa_dogmatcher', 'skilitsa_dogmatcher_sheet_url', __('The Google Sheet URL does not contain a valid spreadsheet ID.', 'skilitsa_dogmatcher'), 'error');
+                add_settings_error('skilitsa_dogmatcher', 'skilitsa_dogmatcher_sheet_url', 'The Google Sheet URL does not contain a valid spreadsheet ID.', 'error');
                 $sheet_url = $settings['sheet_url'] ?? '';
             }
         }
@@ -223,7 +275,7 @@ class Skilitsa_DogMatcher_Admin
     public function handle_refresh(): void
     {
         if (!current_user_can('manage_options')) {
-            wp_die(__('You do not have permission to refresh the DogMatcher data.', 'skilitsa_dogmatcher'));
+            wp_die('You do not have permission to refresh the DogMatcher data.');
         }
 
         check_admin_referer('skilitsa_dogmatcher_refresh', 'skilitsa_dogmatcher_refresh_nonce');
@@ -259,7 +311,7 @@ class Skilitsa_DogMatcher_Admin
         $sheet_id = $this->extract_sheet_id($source_url);
 
         if (!$sheet_id) {
-            $errors[] = __('Missing or invalid Google Sheet ID.', 'skilitsa_dogmatcher');
+            $errors[] = 'Missing or invalid Google Sheet ID.';
             return [
                 'config' => [],
                 'meta' => $this->build_meta($errors, $warnings, $counts),
@@ -272,11 +324,11 @@ class Skilitsa_DogMatcher_Admin
             if (is_wp_error($tab_data)) {
                 if (in_array($tab_data->get_error_code(), ['skilitsa_dogmatcher_not_csv', 'skilitsa_dogmatcher_not_found'], true)) {
                     $errors[] = sprintf(
-                        __('Tab %s could not be fetched as CSV. Please ensure the sheet is shared as \"Anyone with the link: Viewer\" and that the tab name matches exactly.', 'skilitsa_dogmatcher'),
+                        'Tab %s could not be fetched as CSV. Please ensure the sheet is shared as \"Anyone with the link: Viewer\" and that the tab name matches exactly.',
                         $tab
                     );
                 } else {
-                    $errors[] = sprintf(__('Missing tab: %s.', 'skilitsa_dogmatcher'), $tab);
+                    $errors[] = sprintf('Missing tab: %s.', $tab);
                 }
                 continue;
             }
@@ -289,7 +341,7 @@ class Skilitsa_DogMatcher_Admin
             }
             $missing_columns = $this->missing_required_columns($tabs[$tab]['headers'], self::REQUIRED_COLUMNS[$tab]);
             if (!empty($missing_columns)) {
-                $errors[] = sprintf(__('Tab %s is missing required columns: %s.', 'skilitsa_dogmatcher'), $tab, implode(', ', $missing_columns));
+                $errors[] = sprintf('Tab %s is missing required columns: %s.', $tab, implode(', ', $missing_columns));
             }
         }
 
@@ -508,7 +560,7 @@ class Skilitsa_DogMatcher_Admin
         foreach ($mapping_rows as $mapping) {
             $trait_key = $mapping['trait_key'] ?? '';
             if ($trait_key === '' || !isset($traits[$trait_key])) {
-        $warnings[] = sprintf(__('Mapping row references missing trait key: %s.', 'skilitsa_dogmatcher'), (string) $trait_key);
+        $warnings[] = sprintf('Mapping row references missing trait key: %s.', (string) $trait_key);
                 continue;
             }
             $valid_mappings[] = $mapping;
@@ -536,18 +588,18 @@ class Skilitsa_DogMatcher_Admin
 
         if (!empty($breed_missing_trait_values)) {
             $warnings[] = sprintf(
-                __('Breeds missing trait values: %1$d (examples: %2$s). Fix: fill all trait columns per breed (1–5).', 'skilitsa_dogmatcher'),
+                'Breeds missing trait values: %1$d (examples: %2$s). Fix: fill all trait columns per breed (1–5).',
                 count($breed_missing_trait_values),
                 implode(', ', array_slice($breed_missing_trait_values, 0, 10))
             );
         }
 
         if ($breed_missing_external_url > 0) {
-            $warnings[] = sprintf(__('Breeds missing external_url: %d.', 'skilitsa_dogmatcher'), $breed_missing_external_url);
+            $warnings[] = sprintf('Breeds missing external_url: %d.', $breed_missing_external_url);
         }
 
         if ($breed_missing_external_image > 0) {
-            $warnings[] = __('Many breeds do not have external_image_url yet — results will show cards without images. This is OK for MVP.', 'skilitsa_dogmatcher');
+            $warnings[] = 'Many breeds do not have external_image_url yet — results will show cards without images. This is OK for MVP.';
         }
 
         return [
